@@ -29,7 +29,7 @@ runBFParser p input = case parse p "" input of
 
 parseBF = foldr1 apply <$> many1 parsers
     where parsers = loopP <|> incP <|> decP <|> uP <|> rP <|> lP <|> inpP <|> oupP
-          loopP = liftM2 Loop (between (char '[') (char ']') parseBF) parseBF 
+          loopP = liftM2 Loop (between (char '[') (char ']') parseBF) $ try parseBF <|> return Nil
           incP  = char '+' >> return (Node Inc Nil)
           decP  = char '-' >> return (Node Dec Nil)
           uP    = char '^' >> return (Node U   Nil)
@@ -87,5 +87,5 @@ rmNoises = concat.words.(concatMap (concat.takeWhile (/= "//").group)).lines
 
 main = do
     [filePath] <- getArgs
-    input <- rmNoises<$>readFile filePath
+    input <- rmNoises <$> readFile filePath
     run $ runBFParser parseBF input
